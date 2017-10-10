@@ -1,0 +1,246 @@
+Kick Start Configuration  for automatic Redhat /Cent OS 6 installation in client computers.
+
+Kickstart Configuration Requirements
+
+Client Machine Configuration should have : 2 GB Ram, 60 GB Hard disk capacity and a proper network connectivity to the server as per this configuration.
+
+Steps To Configure KickStart :-
+
+Step 1 : Install required packages by proceeding the below command.
+
+yum install dhcp tftp-server nfs-utils syslinux vsftpd
+
+Step 2 : open /etc/dhcp/dhcpd.conf  and paste the below DHCP configuration to provide the IP to the client computer. Change the network settings as per your need.
+
+ 
+
+default-lease-time 600;
+
+max-lease-time 7200;
+
+ 
+
+allow booting;
+
+allow bootp;
+
+authoritative;
+
+ 
+
+subnet 192.168.3.0 netmask 255.255.255.0 {
+
+range 192.168.3.100 192.168.3.200;
+
+next-server 192.168.3.3;
+
+filename “pxelinux.0”;
+
+}
+
+Step 3:  Start the DHCP service
+
+ 
+
+Step 4: Open /etc/xinetd.d/tftp configuration file and modify the below value
+
+ 
+
+disable           =          no
+
+ 
+
+Step 5: Start the xinetd service
+
+ 
+
+Step 6:  Copy all files from Red hat Enterprise Linux 6 DVD to /var/ftp/pub/rhos6/
+
+or
+
+mount the /dev/cdrom to  /var/ftp/pub/rhos6
+
+ 
+
+Step 7 :  Copy all files from isolinux folder to below destination.
+
+cp -a /var/ftp/pub/rhos6/isolinux/*  /var/lib/tftpboot
+
+ 
+
+Step 8 : Please go to /var/lib/tftpboot
+
+ 
+
+Step 9 : Create  a directoty named as pxelinux.cfg and  copy isolinux.cfg  as default and now move the default file to pxelinux.cfg folfer
+
+mkdir pxelinux.cfg
+cp isolinux.cfg default
+mv default pxelinux.cfg
+ 
+
+Step 10 : Open the  pxelinux.cfg/default configuration file
+
+ 
+
+Step 11 : Please ensure the below values on that configuration file
+
+ 
+
+timeout 30
+
+ 
+
+label linux
+
+menu label ^Install or Upgrade an existing system
+
+menu default
+
+kernel vmlinuz
+
+append initrd=initrd.img linux ks=ftp://192.168.3.3/pub/ks.cfg
+
+ 
+
+ 
+
+Step 12 : I have created a below script file to install the Redhat/Cent OS 6 in the destination computer. Now please copy the below script to /var/ftp/pub/ks.cfg . Please change the URL settings as per your need.
+
+ 
+
+# Kickstart file configuration
+
+ 
+
+#version=Redhat Enterprise Linux 6
+
+ 
+
+install
+
+url –url=”ftp://192.168.3.3/pub/rhos6″
+
+lang en_US.UTF-8
+
+keyboard us
+
+network –onboot yes –device eth0 –bootproto dhcp –noipv6
+
+ 
+
+#Root password is “redhat”
+
+ 
+
+rootpw  –iscrypted $1$3FyvFr.8$YtTb4r8F3z8yTzjY3eEw11
+
+ 
+
+# Reboot after installation
+
+ 
+
+reboot
+
+firewall –service=ssh
+
+authconfig –useshadow –enablemd5
+
+selinux –enforcing
+
+timezone –utc Asia/Manila
+
+bootloader –location=mbr –driveorder=sda –append=”crashkernel=auto rhgb quiet”
+
+# The following is the partition information you requested
+
+# Note that any partitions you deleted are not expressed
+
+# here so unless you clear all partitions first, this is
+
+# not guaranteed to work
+
+ 
+
+clearpart –all
+
+ 
+
+# /boot = 300MB
+
+ 
+
+part /boot –fstype=ext4 –size=300
+
+ 
+
+#SWAP Memory = 4GB
+
+ 
+
+part swap –grow –maxsize=4064 –size=4064
+
+ 
+
+# / partition size = 30GB
+
+ 
+
+part / –fstype=ext4 –grow –size=30000
+
+ 
+
+ 
+
+%packages
+
+@Base
+
+@Core
+
+@Desktop
+
+@Fonts
+
+@General Purpose Desktop
+
+@Internet Browser
+
+@Printing client
+
+@X Window System
+
+ 
+
+%end
+
+ 
+
+Step 13 : Please ensure the below permission for ks.cfg configuration file
+
+“rw-r–r–”
+
+ 
+
+ 
+
+Step 14 :   cp /usr/share/syslinux/pxelinux.0   .
+
+ 
+
+Step 15 : Start/Restart the vsftp service
+
+ 
+
+Step 16 : Start/Restart the DHCP service
+
+ 
+
+Step 17 : Start/Restart the XINETD service
+
+ 
+
+ 
+
+That’s all………..Our Kick Start machine is ready to install OS on the client computer.
