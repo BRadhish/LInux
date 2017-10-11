@@ -1,0 +1,63 @@
+First check the Network card comfiguratuion 
+
+vi /etc/sysconfig/network-scripts/ifcfg-eth0
+
+To change 
+ONBOOT = YES
+
+Then 
+service network restart
+
+step:1
+
+cd /media/RHEL/Packages
+
+step : 2
+
+rpm - ivh ftp[press Tab] vsftpd[TAB}
+
+step : 3
+
+cp -rvf /media/RHEL-6.4[TAB]/Packages /var/ftp/Packages
+
+cd /var/ftp/pub/Packages
+
+step:4
+Repository Packages
+
+
+rpm -ivh createepo[tab] python-deltarpm[tab] delta-rpm[tab] python[tab]
+
+step:5
+To create Repository
+
+
+createrepo -v /var/ftp/pub/Packages
+
+
+cd /var/ftp/pub
+ 
+vi yumserver.repo
+
+
+THIS IS FOR YUM SERVER
+
+[yum server]
+
+name ="This is yum seerver"
+baseurl=file:///var/ftp/Package
+enabled =1
+gpgcheck =0
+
+THIS IS FOR YUM CLIENT
+
+[yum server]
+
+name ="This is yum client"
+baseurl=ftp://[server ip]/pub/Package
+enabled =1
+gpgcheck =0
+
+last step 
+step:6
+yum list all
